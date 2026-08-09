@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Clock — YYZ · LHR · MEL</title>
+
+<!-- Home-screen / installable app support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="World Clock">
+<meta name="theme-color" content="#0b0e11">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjMGIwZTExIi8+PGNpcmNsZSBjeD0iOTAiIGN5PSI5MCIgcj0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmYjcwMyIgc3Ryb2tlLXdpZHRoPSI5Ii8+PGxpbmUgeDE9IjkwIiB5MT0iOTAiIHgyPSI5MCIgeTI9IjUyIiBzdHJva2U9IiNmZmI3MDMiIHN0cm9rZS13aWR0aD0iOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGxpbmUgeDE9IjkwIiB5MT0iOTAiIHgyPSIxMTgiIHkyPSIxMDIiIHN0cm9rZT0iI2ZmYjcwMyIgc3Ryb2tlLXdpZHRoPSI5IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSI5MCIgY3k9IjkwIiByPSI3IiBmaWxsPSIjZmZiNzAzIi8+PC9zdmc+Cg==">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjMGIwZTExIi8+PGNpcmNsZSBjeD0iOTAiIGN5PSI5MCIgcj0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmYjcwMyIgc3Ryb2tlLXdpZHRoPSI5Ii8+PGxpbmUgeDE9IjkwIiB5MT0iOTAiIHgyPSI5MCIgeTI9IjUyIiBzdHJva2U9IiNmZmI3MDMiIHN0cm9rZS13aWR0aD0iOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGxpbmUgeDE9IjkwIiB5MT0iOTAiIHgyPSIxMTgiIHkyPSIxMDIiIHN0cm9rZT0iI2ZmYjcwMyIgc3Ryb2tlLXdpZHRoPSI5IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSI5MCIgY3k9IjkwIiByPSI3IiBmaWxsPSIjZmZiNzAzIi8+PC9zdmc+Cg==">
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22World%20Clock%22,%22short_name%22:%22World%20Clock%22,%22display%22:%22standalone%22,%22background_color%22:%22%230b0e11%22,%22theme_color%22:%22%230b0e11%22}">
+<style>
+  :root{
+    --bg:#0b0e11;
+    --panel:#14181d;
+    --panel-2:#181d23;
+    --line:#262c33;
+    --amber:#ffb703;
+    --amber-dim:#8a6206;
+    --text:#e9dfc7;
+    --text-dim:#7c8794;
+    --good:#2fae63;
+    --good-bg:rgba(47,174,99,0.12);
+    --bad:#e2544a;
+    --bad-bg:rgba(226,84,74,0.10);
+    --mono: 'SF Mono', 'JetBrains Mono', Consolas, Menlo, Monaco, 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top, #12161b 0%, var(--bg) 60%);
+    color:var(--text);
+    font-family: var(--mono);
+    padding: 28px 16px 60px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .board{
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .board-header{
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid var(--line);
+    background:
+      repeating-linear-gradient(180deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+  }
+
+  .eyebrow{
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .codes{
+    display:flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .code-flip{
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--amber);
+    text-shadow: 0 0 18px rgba(255,183,3,0.35);
+    animation: flip 0.6s ease-out backwards;
+  }
+  .code-flip span{ display:inline-block; }
+  .code-flip .sep{ color: var(--text-dim); margin: 0 6px; font-weight:400; }
+  .code-flip:nth-child(1){ animation-delay: 0.05s; }
+  @keyframes flip{
+    0%{ transform: rotateX(90deg); opacity:0; }
+    100%{ transform: rotateX(0deg); opacity:1; }
+  }
+
+  .city-names{
+    display:flex;
+    gap: 4px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+  }
+
+  .live-row{
+    display:flex;
+    gap: 22px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .live-cell{
+    flex: 1;
+    min-width: 150px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .live-cell .lbl{
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .live-cell .val{
+    font-size: 20px;
+    color: var(--amber);
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .live-cell .date{
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .actions{
+    display:flex;
+    gap: 10px;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel-2);
+  }
+  button{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--amber);
+    border: 1px solid var(--amber-dim);
+    border-radius: 5px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  button:hover{ background: rgba(255,183,3,0.1); }
+  button:active{ transform: translateY(1px); }
+
+  .legend{
+    display:flex;
+    gap:16px;
+    padding: 10px 24px;
+    font-size: 11px;
+    color: var(--text-dim);
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .dot{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+  .dot.good{ background: var(--good); }
+  .dot.bad{ background: var(--bad); }
+  .dot.now{ background: var(--amber); }
+
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th{
+    text-align: left;
+    padding: 10px 20px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: var(--panel);
+  }
+  tbody td{
+    padding: 9px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  tbody tr:hover{ background: rgba(255,255,255,0.02); }
+  tbody tr.current{
+    box-shadow: inset 3px 0 0 var(--amber);
+    background: rgba(255,183,3,0.06);
+  }
+  tbody tr.current td{ color: var(--amber); }
+
+  td.good{ color: var(--good); }
+  td.bad{ color: var(--bad); }
+
+  .daytag{
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-left: 6px;
+  }
+
+  .footer{
+    padding: 16px 24px 20px;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 480px){
+    thead th, tbody td{ padding: 8px 12px; font-size: 12px; }
+    .code-flip{ font-size: 22px; }
+  }
+
+  @media print{
+    body{ background:#fff; color:#000; padding:0; }
+    .board{ box-shadow:none; border:none; max-width:100%; }
+    .board-header{ background:#fff; }
+    .code-flip{ color:#000; text-shadow:none; }
+    .actions{ display:none; }
+    .legend{ color:#333; }
+    thead th{ background:#fff; color:#000; }
+    tbody tr.current{ background:#f0f0f0 !important; box-shadow:none; border-left:3px solid #000; }
+    tbody tr.current td{ color:#000; font-weight:600; }
+    td.good{ color:#000; }
+    td.bad{ color:#000; font-weight:600; }
+    .live-cell{ border:1px solid #ccc; }
+    .live-cell .val{ color:#000; }
+  }
+</style>
+</head>
+<body>
+
+<div class="board" id="board">
+
+  <div class="board-header">
+    <div class="eyebrow">World Clock · Reference Chart</div>
+    <div class="codes">
+      <span class="code-flip">YYZ<span class="sep">·</span>LHR<span class="sep">·</span>MEL</span>
+    </div>
+    <div class="city-names">Toronto — London — Melbourne</div>
+
+    <div class="live-row" id="liveRow"></div>
+  </div>
+
+  <div class="actions">
+    <button id="printBtn">Print / Save PDF</button>
+    <button id="csvBtn">Download CSV</button>
+  </div>
+
+  <div class="legend">
+    <span><span class="dot now"></span> current hour</span>
+    <span><span class="dot good"></span> reasonable hours (8:00–21:00 local)</span>
+    <span><span class="dot bad"></span> late night / early morning</span>
+  </div>
+
+  <table id="chartTable">
+    <thead>
+      <tr>
+        <th>Toronto</th>
+        <th>London</th>
+        <th>Melbourne</th>
+      </tr>
+    </thead>
+    <tbody id="chartBody"></tbody>
+  </table>
+
+  <div class="footer" id="footer"></div>
+</div>
+
+<script>
+function getOffsetMinutes(timeZone, date){
+  const dtf = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' });
+  const parts = dtf.formatToParts(date);
+  const tzPart = parts.find(p => p.type === 'timeZoneName').value; // e.g. "GMT-4" or "GMT+10:30"
+  const m = tzPart.match(/GMT([+-])(\d+)(?::(\d+))?/);
+  if(!m) return 0;
+  const sign = m[1] === '-' ? -1 : 1;
+  const hours = parseInt(m[2], 10);
+  const mins = m[3] ? parseInt(m[3], 10) : 0;
+  return sign * (hours * 60 + mins);
+}
+
+function fmtTime(date, timeZone){
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone, hour: 'numeric', minute: '2-digit', hour12: true
+  }).format(date);
+}
+function fmtDateShort(date, timeZone){
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone, weekday: 'short', month: 'short', day: 'numeric'
+  }).format(date);
+}
+function dateKey(date, timeZone){
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone, year:'numeric', month:'2-digit', day:'2-digit'
+  }).format(date);
+}
+function localHour(date, timeZone){
+  return parseInt(new Intl.DateTimeFormat('en-US', {
+    timeZone, hour:'numeric', hour12:false
+  }).format(date), 10);
+}
+
+const ZONES = {
+  Toronto: 'America/Toronto',
+  London: 'Europe/London',
+  Melbourne: 'Australia/Melbourne'
+};
+
+// Find the UTC instant corresponding to today's midnight in Toronto.
+function torontoMidnightUTC(now){
+  const torontoDateStr = dateKey(now, ZONES.Toronto); // YYYY-MM-DD
+  const guess = new Date(torontoDateStr + 'T00:00:00Z');
+  const offsetMin = getOffsetMinutes(ZONES.Toronto, guess);
+  return new Date(guess.getTime() - offsetMin * 60000);
+}
+
+function classify(hour){
+  if(hour >= 8 && hour <= 21) return 'good';
+  if(hour < 6 || hour >= 22) return 'bad';
+  return '';
+}
+
+function buildChart(){
+  const now = new Date();
+  const baseUTC = torontoMidnightUTC(now);
+  const torontoBaseDate = dateKey(baseUTC, ZONES.Toronto);
+
+  const tbody = document.getElementById('chartBody');
+  tbody.innerHTML = '';
+
+  const csvRows = [['Toronto','London','Melbourne']];
+  let currentRowEl = null;
+
+  for(let i = 0; i < 24; i++){
+    const instant = new Date(baseUTC.getTime() + i * 3600000);
+    const tr = document.createElement('tr');
+
+    const isCurrentHour = instant <= now && now < new Date(instant.getTime() + 3600000);
+    if(isCurrentHour){ tr.classList.add('current'); currentRowEl = tr; }
+
+    const csvCells = [];
+
+    ['Toronto','London','Melbourne'].forEach(city => {
+      const tz = ZONES[city];
+      const t = fmtTime(instant, tz);
+      const dayKey = dateKey(instant, tz);
+      const dayDiff = Math.round((new Date(dayKey) - new Date(torontoBaseDate)) / 86400000);
+      const tag = dayDiff === 0 ? '' : (dayDiff > 0 ? ' +1' : ' -1');
+
+      const td = document.createElement('td');
+      const cls = classify(localHour(instant, tz));
+      if(cls) td.classList.add(cls);
+      td.innerHTML = t + (tag ? '<span class="daytag">' + tag.trim() + '</span>' : '');
+      tr.appendChild(td);
+
+      csvCells.push(t + tag);
+    });
+
+    tbody.appendChild(tr);
+    csvRows.push(csvCells);
+  }
+
+  // Live clocks
+  const liveRow = document.getElementById('liveRow');
+  liveRow.innerHTML = '';
+  Object.entries(ZONES).forEach(([city, tz]) => {
+    const cell = document.createElement('div');
+    cell.className = 'live-cell';
+    cell.innerHTML = `
+      <div class="lbl">${city}</div>
+      <div class="val" data-tz="${tz}">${fmtTime(now, tz)}</div>
+      <div class="date">${fmtDateShort(now, tz)}</div>
+    `;
+    liveRow.appendChild(cell);
+  });
+
+  document.getElementById('footer').textContent =
+    'Offsets reflect current DST rules and update automatically. Generated ' +
+    fmtDateShort(now, ZONES.Toronto) + ' — Toronto time.';
+
+  window._csvRows = csvRows;
+
+  if(currentRowEl){
+    currentRowEl.scrollIntoView({ block: 'center' });
+  }
+}
+
+function tickLiveClocks(){
+  const now = new Date();
+  document.querySelectorAll('.live-cell .val').forEach(el => {
+    el.textContent = fmtTime(now, el.dataset.tz);
+  });
+}
+
+buildChart();
+setInterval(tickLiveClocks, 1000);
+setInterval(buildChart, 60000); // rebuild full table every minute to keep "current hour" accurate
+
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+document.getElementById('csvBtn').addEventListener('click', () => {
+  const rows = window._csvRows || [];
+  const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'toronto-london-melbourne-time-chart.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+</script>
+
+</body>
+</html>
