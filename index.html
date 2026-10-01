@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Duckie Time — YYZ · LHR · MEL</title>
+<title>Duckie Time — LHR · MEL</title>
 
 <!-- Home-screen / installable app support -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -271,9 +271,9 @@
   <div class="board-header">
     <div class="eyebrow">Duckie Time · Reference Chart</div>
     <div class="codes">
-      <span class="code-flip">YYZ<span class="sep">·</span>LHR<span class="sep">·</span>MEL</span>
+      <span class="code-flip">LHR<span class="sep">·</span>MEL</span>
     </div>
-    <div class="city-names">Toronto — London — Melbourne</div>
+    <div class="city-names">London — Melbourne</div>
 
     <div class="live-row" id="liveRow"></div>
   </div>
@@ -292,7 +292,6 @@
   <table id="chartTable">
     <thead>
       <tr>
-        <th>Toronto</th>
         <th>London</th>
         <th>Melbourne</th>
       </tr>
@@ -338,16 +337,15 @@ function localHour(date, timeZone){
 }
 
 const ZONES = {
-  Toronto: 'America/Toronto',
   London: 'Europe/London',
   Melbourne: 'Australia/Melbourne'
 };
 
-// Find the UTC instant corresponding to today's midnight in Toronto.
+// Find the UTC instant corresponding to today's midnight in London.
 function anchorMidnightUTC(now){
-  const anchorDateStr = dateKey(now, ZONES.Toronto); // YYYY-MM-DD
+  const anchorDateStr = dateKey(now, ZONES.London); // YYYY-MM-DD
   const guess = new Date(anchorDateStr + 'T00:00:00Z');
-  const offsetMin = getOffsetMinutes(ZONES.Toronto, guess);
+  const offsetMin = getOffsetMinutes(ZONES.London, guess);
   return new Date(guess.getTime() - offsetMin * 60000);
 }
 
@@ -360,12 +358,12 @@ function classify(hour){
 function buildChart(){
   const now = new Date();
   const baseUTC = anchorMidnightUTC(now);
-  const anchorBaseDate = dateKey(baseUTC, ZONES.Toronto);
+  const anchorBaseDate = dateKey(baseUTC, ZONES.London);
 
   const tbody = document.getElementById('chartBody');
   tbody.innerHTML = '';
 
-  const csvRows = [['Toronto','London','Melbourne']];
+  const csvRows = [['London','Melbourne']];
   let currentRowEl = null;
 
   for(let i = 0; i < 24; i++){
@@ -377,7 +375,7 @@ function buildChart(){
 
     const csvCells = [];
 
-    ['Toronto','London','Melbourne'].forEach(city => {
+    ['London','Melbourne'].forEach(city => {
       const tz = ZONES[city];
       const t = fmtTime(instant, tz);
       const dayKey = dateKey(instant, tz);
@@ -413,7 +411,7 @@ function buildChart(){
 
   document.getElementById('footer').textContent =
     'Offsets reflect current DST rules and update automatically. Generated ' +
-    fmtDateShort(now, ZONES.Toronto) + ' — Toronto time.';
+    fmtDateShort(now, ZONES.London) + ' — London time.';
 
   window._csvRows = csvRows;
 
